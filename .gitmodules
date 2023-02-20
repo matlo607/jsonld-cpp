@@ -1,3 +1,0 @@
-[submodule "external/http-link-header-cpp"]
-	path = external/http-link-header-cpp
-	url = https://github.com/dcdpr/http-link-header-cpp.git
