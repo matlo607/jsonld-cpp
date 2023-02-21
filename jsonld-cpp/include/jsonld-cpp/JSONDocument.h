@@ -1,7 +1,7 @@
 #ifndef LIBJSONLD_CPP_JSONDOCUMENT_H
 #define LIBJSONLD_CPP_JSONDOCUMENT_H
 
-#include "jsonld-cpp/RemoteDocument.h"
+#include <jsonld-cpp/RemoteDocument.h>
 
 namespace RDF {
     class RDFDataset;

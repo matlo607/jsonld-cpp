@@ -1,7 +1,7 @@
 #ifndef LIBJSONLD_CPP_RDFTRIPLE_H
 #define LIBJSONLD_CPP_RDFTRIPLE_H
 
-#include "jsonld-cpp/RDFNode.h"
+#include <jsonld-cpp/RDFNode.h>
 #include <memory>
 #include <string>
 

@@ -1,9 +1,9 @@
 #ifndef LIBJSONLD_CPP_CONTEXT_H
 #define LIBJSONLD_CPP_CONTEXT_H
 
-#include "jsonld-cpp/jsoninc.h"
-#include "jsonld-cpp/JsonLdConsts.h"
-#include "jsonld-cpp/JsonLdOptions.h"
+#include <nlohmann/json.hpp>
+#include <jsonld-cpp/JsonLdConsts.h>
+#include <jsonld-cpp/JsonLdOptions.h>
 #include <string>
 #include <memory>
 

@@ -2,7 +2,7 @@
 #define LIBJSONLD_CPP_TESTCASEOPTIONS_H
 
 #include <jsonld-cpp/JsonLdOptions.h>
-#include <jsonld-cpp/jsoninc.h>
+#include <nlohmann/json.hpp>
 
 struct TestCaseOptions {
     static TestCaseOptions create(nlohmann::json o, std::string baseUri);

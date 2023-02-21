@@ -1,8 +1,8 @@
 #ifndef LIBJSONLD_CPP_JSONLDPROCESSOR_H
 #define LIBJSONLD_CPP_JSONLDPROCESSOR_H
 
-#include "jsonld-cpp/jsoninc.h"
-#include "jsonld-cpp/JsonLdOptions.h"
+#include <nlohmann/json.hpp>
+#include <jsonld-cpp/JsonLdOptions.h>
 
 namespace RDF {
     class RDFDataset;

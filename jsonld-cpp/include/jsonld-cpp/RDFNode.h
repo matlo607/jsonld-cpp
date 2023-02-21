@@ -1,7 +1,7 @@
 #ifndef LIBJSONLD_CPP_RDFNODE_H
 #define LIBJSONLD_CPP_RDFNODE_H
 
-#include "jsonld-cpp/jsoninc.h"
+#include <nlohmann/json.hpp>
 #include <memory>
 #include <string>
 

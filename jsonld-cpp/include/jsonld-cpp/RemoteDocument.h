@@ -1,8 +1,8 @@
 #ifndef LIBJSONLD_CPP_REMOTEDOCUMENT_H
 #define LIBJSONLD_CPP_REMOTEDOCUMENT_H
 
-#include "jsonld-cpp/jsoninc.h"
-#include "jsonld-cpp/MediaType.h"
+#include <nlohmann/json.hpp>
+#include <jsonld-cpp/MediaType.h>
 #include <string>
 
 namespace RDF {

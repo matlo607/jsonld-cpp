@@ -1,9 +1,9 @@
 #ifndef LIBJSONLD_CPP_RDFDATASET_H
 #define LIBJSONLD_CPP_RDFDATASET_H
 
-#include "jsonld-cpp/RDFTriple.h"
-#include "jsonld-cpp/RDFQuad.h"
-#include "jsonld-cpp/JsonLdOptions.h"
+#include <jsonld-cpp/RDFTriple.h>
+#include <jsonld-cpp/RDFQuad.h>
+#include <jsonld-cpp/JsonLdOptions.h>
 #include <vector>
 #include <map>
 #include <string>

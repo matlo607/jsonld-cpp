@@ -1,7 +1,7 @@
 #ifndef LIBJSONLD_CPP_JSONLDUTILS_H
 #define LIBJSONLD_CPP_JSONLDUTILS_H
 
-#include "jsonld-cpp/jsoninc.h"
+#include <nlohmann/json.hpp>
 
 namespace JsonLdUtils {
 

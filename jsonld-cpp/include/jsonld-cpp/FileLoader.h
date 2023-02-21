@@ -1,7 +1,7 @@
 #ifndef LIBJSONLD_CPP_FILELOADER_H
 #define LIBJSONLD_CPP_FILELOADER_H
 
-#include "jsonld-cpp/DocumentLoader.h"
+#include <jsonld-cpp/DocumentLoader.h>
 
 class RemoteDocument;
 

@@ -3,7 +3,7 @@
 
 #include "RdfData.h"
 #include "TestResult.h"
-#include <jsonld-cpp/jsoninc.h>
+#include <nlohmann/json.hpp>
 #include <regex>
 
 /**

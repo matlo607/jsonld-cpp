@@ -1,5 +1,5 @@
 #include <jsonld-cpp/JsonLdUtils.h>
-#include <jsonld-cpp/jsoninc.h>
+#include <nlohmann/json.hpp>
 
 using nlohmann::json;
 

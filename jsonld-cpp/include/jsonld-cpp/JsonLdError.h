@@ -1,7 +1,7 @@
 #ifndef LIBJSONLD_CPP_JSONLDERROR_H
 #define LIBJSONLD_CPP_JSONLDERROR_H
 
-#include "jsonld-cpp/jsoninc.h"
+#include <nlohmann/json.hpp>
 
 class JsonLdError : public std::runtime_error {
 public:

@@ -4,9 +4,9 @@
 // The JsonLdOptions type as specified in "JSON-LD-API specification":
 // https://www.w3.org/TR/json-ld-api/#the-jsonldoptions-type
 
-#include "jsonld-cpp/jsoninc.h"
-#include "jsonld-cpp/DocumentLoader.h"
-#include "jsonld-cpp/JsonLdConsts.h"
+#include <nlohmann/json.hpp>
+#include <jsonld-cpp/DocumentLoader.h>
+#include <jsonld-cpp/JsonLdConsts.h>
 #include <string>
 #include <sstream>
 

@@ -1,6 +1,6 @@
 #include <jsonld-cpp/FileLoader.h>
 #include <jsonld-cpp/RemoteDocument.h>
-#include <jsonld-cpp/jsoninc.h>
+#include <nlohmann/json.hpp>
 
 using nlohmann::json;
 

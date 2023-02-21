@@ -1,7 +1,7 @@
 #ifndef LIBJSONLD_CPP_TESTCASE_H
 #define LIBJSONLD_CPP_TESTCASE_H
 
-#include <jsonld-cpp/jsoninc.h>
+#include <nlohmann/json.hpp>
 #include "TestCaseOptions.h"
 
 #include <string>

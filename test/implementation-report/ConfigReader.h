@@ -4,7 +4,7 @@
 #include <string>
 #include <set>
 #include <vector>
-#include <jsonld-cpp/jsoninc.h>
+#include <nlohmann/json.hpp>
 
 /**
  * \brief   Interface for reading the configuration file
