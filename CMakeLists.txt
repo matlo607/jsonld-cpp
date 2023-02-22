@@ -27,19 +27,106 @@ set(JSONLDCPP_VERSION ${JSONLDCPP_VERSION_MAJOR}.${JSONLDCPP_VERSION_MINOR}.${JS
 set(JSONLDCPP_PROJECT "jsonld-cpp" CACHE STRING "Project Name")
 
 # Test settings
-
-set(JSONLDCPP_BUILD_TESTS ON CACHE BOOL "Build test executables")
-set(JSONLDCPP_BUILD_GOOGLETEST ON CACHE BOOL "Build googletest for testing")
-set(JSONLDCPP_BUILD_RAPIDCHECK ON CACHE BOOL "Build rapidcheck for testing")
-
+option(JSONLDCPP_BUILD_TESTS "Build test executables" ON)
 # Examples settings
+option(JSONLDCPP_BUILD_EXAMPLES "Build example executables" ON)
+# Load conanbuildinfo.cmake
+option(USE_CONAN "If Conan is installed, use Conan to pull the project dependencies" OFF)
 
-set(JSONLDCPP_BUILD_EXAMPLES ON CACHE BOOL "Build example executables")
+###############
+# Conan support
+###############
 
-# Install
+find_program (CONAN_BIN conan)
+if(CONAN_BIN AND USE_CONAN)
+    message (STATUS "Found conan C++ package manager: ${CONAN_BIN}")
+    find_file (CONANFILE NAMES "conanfile.txt" HINTS "${CMAKE_SOURCE_DIR}")
+    if (CONANFILE)
+        message (STATUS "Found ${CONANFILE}")
+        if (NOT EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+            message(STATUS "Trying to execute 'conan install'")
+            get_filename_component(CONANFILE_DIR ${CONANFILE} DIRECTORY)
+            execute_process(COMMAND conan install ${CONANFILE_DIR} --build=missing)
+        endif()
+    endif()
 
-set(INSTALL_JSONLDCPP ON CACHE BOOL "Enable installation")
+    if (EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+        include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+        message(STATUS "conan_basic_setup()")
+        conan_basic_setup(TARGETS)
+    else()
+        message(WARNING "Please run 'conan install' if you plan to use conan")
+    endif()
+endif()
 
+##########################################
+# Local CMake scripts and finders (if any)
+##########################################
+
+if (EXISTS "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+endif()
+
+###############################
+# Check compiler's capabilities
+###############################
+
+include (CheckCCompilerFlag)
+include (CheckCXXCompilerFlag)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set (CMAKE_COMPILER_IS_CLANG true)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    set (CMAKE_COMPILER_IS_MSVC true)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANG)
+    find_program (LINKER_BIN gold)
+    if(LINKER_BIN)
+        set(LINKER_BIN "gold")
+    else()
+        find_program (LINKER_BIN ld.gold)
+        if(LINKER_BIN)
+            set(LINKER_BIN "ld.gold")
+        else()
+            set(LINKER_BIN "ld")
+        endif()
+    endif()
+
+    if (CMAKE_COMPILER_IS_GNUCXX)
+        add_compile_options(-fdiagnostics-color=always)
+    elseif (CMAKE_COMPILER_IS_CLANG)
+        add_compile_options(-fcolor-diagnostics)
+    endif()
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+    #set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
+
+    CHECK_CXX_COMPILER_FLAG("-fuse-ld=${LINKER_BIN}" USE_LINKER_LD_GOLD)
+    if(USE_LINKER_LD_GOLD)
+        set (CMAKE_SHARED_LINKER_FLAGS "-fuse-ld=${LINKER_BIN} ${CMAKE_SHARED_LINKER_FLAGS}")
+    endif()
+endif()
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
+    set(CMAKE_MACOSX_RPATH OFF)
+endif()
+
+message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+set (CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_PREFIX}/include")
+set (CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/lib")
+set (CMAKE_INSTALL_BINDIR "${CMAKE_INSTALL_PREFIX}/bin")
+message(STATUS "CMAKE_INSTALL_INCLUDEDIR: ${CMAKE_INSTALL_INCLUDEDIR}")
+message(STATUS "CMAKE_INSTALL_LIBDIR: ${CMAKE_INSTALL_LIBDIR}")
+message(STATUS "CMAKE_INSTALL_BINDIR: ${CMAKE_INSTALL_BINDIR}")
 
 # Log settings
 
@@ -51,20 +138,11 @@ message(STATUS "JSONLDCPP_VERSION            : " ${JSONLDCPP_VERSION})
 message(STATUS "JSONLDCPP_BUILD_TESTS        : " ${JSONLDCPP_BUILD_TESTS})
 message(STATUS "JSONLDCPP_BUILD_EXAMPLES     : " ${JSONLDCPP_BUILD_EXAMPLES})
 
-message(STATUS "INSTALL_JSONLDCPP            : " ${INSTALL_JSONLDCPP})
 message(STATUS "CMAKE_BUILD_TYPE            : " ${CMAKE_BUILD_TYPE})
 message(STATUS "CMAKE_INSTALL_PREFIX        : " ${CMAKE_INSTALL_PREFIX})
 message(STATUS "CMAKE_TOOLCHAIN_FILE        : " ${CMAKE_TOOLCHAIN_FILE})
 
 message(STATUS "---------------------------------------------------")
-
-if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(installDir ${CMAKE_CURRENT_BINARY_DIR}/install)
-else()
-  set(installDir ${CMAKE_INSTALL_PREFIX})
-endif()
-message(STATUS "installDir        : " ${installDir})
-
 
 # Project
 
@@ -73,79 +151,14 @@ project(${JSONLDCPP_PROJECT} VERSION ${JSONLDCPP_VERSION}
         HOMEPAGE_URL "https://github.com/dcdpr/jsonld-cpp"
         LANGUAGES CXX )
 
-
-# Super build...
-include(ExternalProject)
-
-# Add subdirectories for external dependencies
-
-ExternalProject_Add(cpr
-      SOURCE_DIR  ${CMAKE_CURRENT_LIST_DIR}/external/cpr
-      INSTALL_DIR ${installDir}
-      CMAKE_ARGS  -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-                  -DCPR_BUILD_TESTS=OFF
-  )
-
-ExternalProject_Add(uriparser
-      SOURCE_DIR  ${CMAKE_CURRENT_LIST_DIR}/external/uriparser
-      INSTALL_DIR ${installDir}
-      CMAKE_ARGS  -DCMAKE_PREFIX_PATH:PATH=<INSTALL_DIR>
-                  -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-                  -DURIPARSER_BUILD_DOCS=OFF
-                  -DURIPARSER_BUILD_TESTS=OFF
-                  -DURIPARSER_BUILD_TOOLS=OFF
-                  -DURIPARSER_BUILD_CHAR=ON
-                  -DURIPARSER_BUILD_WCHAR_T=ON
-                  -DURIPARSER_ENABLE_INSTALL=ON
-  )
-
-ExternalProject_Add(http-link-header-cpp
-      SOURCE_DIR  ${CMAKE_CURRENT_LIST_DIR}/external/http-link-header-cpp
-      GIT_REPOSITORY https://github.com/dcdpr/http-link-header-cpp.git
-      GIT_TAG origin/main
-      INSTALL_DIR ${installDir}
-      CMAKE_ARGS  -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-                  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-                  -DCMAKE_PREFIX_PATH:PATH=<INSTALL_DIR>
-                  -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-      DEPENDS     uriparser
-  )
-
-# Add local subdirectories
-
-ExternalProject_Add(jsonld-cpp-library
-      SOURCE_DIR  ${CMAKE_CURRENT_LIST_DIR}/jsonld-cpp
-      INSTALL_DIR ${installDir}
-      CMAKE_ARGS  -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-                  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-                  -DCMAKE_PREFIX_PATH:PATH=<INSTALL_DIR>
-                  -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-                  -DJSONLDCPP_VERSION=${JSONLDCPP_VERSION}
-                  -DINSTALL_JSONLDCPP=${INSTALL_JSONLDCPP}
-                  -DJSONLDCPP_BUILD_TESTS=${JSONLDCPP_BUILD_TESTS}
-                  -DJSONLDCPP_BUILD_GOOGLETEST=${JSONLDCPP_BUILD_GOOGLETEST}
-                  -DJSONLDCPP_BUILD_RAPIDCHECK=${JSONLDCPP_BUILD_RAPIDCHECK}
-      DEPENDS     uriparser http-link-header-cpp cpr
-  )
-
+add_subdirectory(jsonld-cpp)
 if(JSONLDCPP_BUILD_EXAMPLES)
-
-ExternalProject_Add(jsonld-cpp-examples
-      SOURCE_DIR  ${CMAKE_CURRENT_LIST_DIR}/examples
-      INSTALL_DIR ${installDir}
-      CMAKE_ARGS  -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-                  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-                  -DCMAKE_PREFIX_PATH:PATH=<INSTALL_DIR>
-                  -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-                  -DJSONLDCPP_VERSION=${JSONLDCPP_VERSION}
-      INSTALL_COMMAND     ""
-      DEPENDS     jsonld-cpp-library
-  )
-
+  add_subdirectory(examples)
 endif()
 
-add_custom_target(
-  test
-  COMMAND ctest
-  WORKING_DIRECTORY jsonld-cpp-library-prefix/src/jsonld-cpp-library-build/test/testjsonld-cpp
-  DEPENDS jsonld-cpp-library)
+if(JSONLDCPP_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(test)
+else()
+  message(STATUS "Skipping unit tests")
+endif()

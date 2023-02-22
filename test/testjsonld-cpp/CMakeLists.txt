@@ -1,14 +1,17 @@
-# Turn off some warnings to silence issues coming from googletest code
-if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
-elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-  add_definitions(-Wno-weak-vtables -Wno-exit-time-destructors -Wno-global-constructors)
+find_package(GTest REQUIRED)
+find_package(rapidcheck REQUIRED)
+
+set(TEST_ENV_VARS "LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH}")
+if (APPLE)
+    set(TEST_ENV_VARS "${TEST_ENV_VARS};DYLD_FALLBACK_LIBRARY_PATH=${CMAKE_BINARY_DIR}/lib")
 endif()
 
 #
 # Build common test files into lib so they only need to be compiled once
 #
 add_library(
-    libjsonld-cpp_test STATIC
+    libjsonld-cpp_test
+    STATIC
     main.cpp
     ManifestLoader.cpp
     ManifestLoader.h
@@ -22,12 +25,12 @@ add_library(
     TestCaseOptions.h
 )
 
-target_link_libraries(
-    libjsonld-cpp_test
-    jsonld-cpp::jsonld-cpp
-    gtest
-    gmock
-    rapidcheck_gtest
+target_link_libraries(libjsonld-cpp_test
+    PUBLIC
+    jsonld-cpp
+    GTest::GTest
+    GTest::gmock
+    rapidcheck::rapidcheck
 )
 
 #
@@ -53,14 +56,16 @@ add_executable(
     test_Sha256.cpp
 )
 
-target_compile_features(UnitTests_jsonld-cpp PRIVATE cxx_std_11)
-set_target_properties(UnitTests_jsonld-cpp PROPERTIES CXX_EXTENSIONS OFF)
-target_compile_definitions(UnitTests_jsonld-cpp PUBLIC TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/")
+target_compile_definitions(UnitTests_jsonld-cpp
+    PUBLIC TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/")
 
-target_link_libraries(UnitTests_jsonld-cpp PUBLIC libjsonld-cpp_test )
+target_link_libraries(UnitTests_jsonld-cpp PUBLIC libjsonld-cpp_test)
 
 add_test(NAME UnitTests_jsonld-cpp
-         COMMAND UnitTests_jsonld-cpp)
+    COMMAND UnitTests_jsonld-cpp)
+set_tests_properties(UnitTests_jsonld-cpp
+    PROPERTIES
+    ENVIRONMENT "${TEST_ENV_VARS}")
 
 #
 # API
@@ -73,13 +78,14 @@ foreach(ALGO ${ALGORITHMS})
         UnitTests_JsonLdProcessor_${ALGO}_jsonld-cpp
         test_JsonLdProcessor_${ALGO}.cpp
     )
-
-    target_compile_features(UnitTests_JsonLdProcessor_${ALGO}_jsonld-cpp PRIVATE cxx_std_11)
-    set_target_properties(UnitTests_JsonLdProcessor_${ALGO}_jsonld-cpp PROPERTIES CXX_EXTENSIONS OFF)
-    target_compile_definitions(UnitTests_JsonLdProcessor_${ALGO}_jsonld-cpp PUBLIC TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/")
+    target_compile_definitions(UnitTests_JsonLdProcessor_${ALGO}_jsonld-cpp
+        PUBLIC TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/")
 
     target_link_libraries(UnitTests_JsonLdProcessor_${ALGO}_jsonld-cpp libjsonld-cpp_test)
 
     add_test(NAME UnitTests_JsonLdProcessor_${ALGO}_jsonld-cpp
-             COMMAND UnitTests_JsonLdProcessor_${ALGO}_jsonld-cpp)
+        COMMAND UnitTests_JsonLdProcessor_${ALGO}_jsonld-cpp)
+    set_tests_properties(UnitTests_JsonLdProcessor_${ALGO}_jsonld-cpp
+        PROPERTIES
+        ENVIRONMENT "${TEST_ENV_VARS}")
 endforeach()

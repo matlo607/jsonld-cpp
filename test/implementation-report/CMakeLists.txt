@@ -1,6 +1,3 @@
-#
-# Implementation Report
-#
 add_executable(
     implementation-report
     main.cpp
@@ -20,22 +17,9 @@ add_executable(
     RdfDataBuilder.cpp
     TestResult.h
 )
-target_compile_features(
-    implementation-report
-    PRIVATE
-    cxx_std_11
-)
-set_target_properties(
-    implementation-report
-    PROPERTIES
-    CXX_EXTENSIONS OFF
-)
-target_include_directories(
-    implementation-report
+target_include_directories(implementation-report
     PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../include>"
-)
-target_link_libraries(
-        implementation-report
-        jsonld-cpp::jsonld-cpp
-)
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
+target_link_libraries(implementation-report
+    PRIVATE
+    jsonld-cpp)
