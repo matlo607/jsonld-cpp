@@ -42,7 +42,7 @@ int main (int argc, char *argv[]) {
 
     std::string fileUri = "file://" + inputFilename;
 
-    std::unique_ptr<FileLoader> loader(new FileLoader);
+    auto loader = std::make_unique<FileLoader>(inputFilename);
     JsonLdOptions opts(fileUri);
     opts.setDocumentLoader(std::move(loader));
 

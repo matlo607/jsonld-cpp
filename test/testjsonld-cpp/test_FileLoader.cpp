@@ -15,12 +15,28 @@ using nlohmann::json;
 #pragma GCC diagnostic pop
 
 TEST(DocumentLoaderTest, load_sample_document_from_filesystem) {
-    FileLoader dl;
-
     std::string resource_dir = TEST_RESOURCE_DIR;
     std::string docPath = resource_dir + "test_data/pi-is-four.json";
 
+    FileLoader dl(docPath);
+
     auto d = dl.loadDocument(docPath);
+    json j = d->getJSONContent();
+    EXPECT_FALSE(j == nullptr);
+    EXPECT_FALSE(j.is_null());
+    EXPECT_EQ(4, j["pi"]);
+}
+
+TEST(DocumentLoaderTest, load_sample_document_from_string) {
+    std::string resource_dir = TEST_RESOURCE_DIR;
+    std::string docPath = resource_dir + "test_data/pi-is-four.json";
+
+    FileLoader dl(docPath);
+    std::string content = "{ \"pi\": 4 }";
+    std::stringstream sbuffer(content);
+    auto loader = std::make_unique<FileLoader>(sbuffer, MediaType::json());
+
+    auto d = loader->loadDocument(docPath);
     json j = d->getJSONContent();
     EXPECT_FALSE(j == nullptr);
     EXPECT_FALSE(j.is_null());

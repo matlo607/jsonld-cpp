@@ -3,8 +3,11 @@
 
 using json = nlohmann::json;
 
-ManifestLoader::ManifestLoader(const std::string &imanifestBase, const std::string &imanifestName)
-        : manifestBase(imanifestBase), manifestName(imanifestName) {}
+ManifestLoader::ManifestLoader(const std::string &imanifestBase, const std::string &imanifestName):
+    documentLoader(imanifestBase + imanifestName),
+    manifestBase(imanifestBase),
+    manifestName(imanifestName)
+{}
 
 std::map<std::string, TestCase> ManifestLoader::load() {
 
@@ -23,5 +26,3 @@ std::map<std::string, TestCase> ManifestLoader::load() {
 
     return result;
 }
-
-

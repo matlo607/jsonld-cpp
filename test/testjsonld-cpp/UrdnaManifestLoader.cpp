@@ -3,8 +3,11 @@
 
 using json = nlohmann::json;
 
-UrdnaManifestLoader::UrdnaManifestLoader(const std::string &imanifestBase, const std::string &imanifestName)
-        : manifestBase(imanifestBase), manifestName(imanifestName) {}
+UrdnaManifestLoader::UrdnaManifestLoader(const std::string &imanifestBase, const std::string &imanifestName):
+    documentLoader(imanifestBase + imanifestName),
+    manifestBase(imanifestBase),
+    manifestName(imanifestName)
+{}
 
 std::map<std::string, TestCase> UrdnaManifestLoader::load() {
 

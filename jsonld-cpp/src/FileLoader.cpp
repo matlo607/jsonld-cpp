@@ -38,9 +38,45 @@ namespace {
 
 }
 
+FileLoader::FileLoader(const std::filesystem::path& filepath):
+    istream_ptr_(nullptr),
+    filepath_(filepath),
+    content_type_(MediaType::any())
+{}
+
+FileLoader::FileLoader(std::istream& istream, MediaType content_type):
+    istream_ptr_(&istream),
+    filepath_(),
+    content_type_(content_type)
+{}
+
+std::unique_ptr<RemoteDocument> FileLoader::loadDocument(
+    MediaType contentType,
+    std::istream& inputStream,
+    std::string localUrl)
+{
+    if (JSONDocument::accepts(contentType)) {
+        if(localUrl.find("file://") == std::string::npos) {
+            localUrl = "file://" + localUrl;
+        }
+
+        return std::unique_ptr<RemoteDocument>(
+                new JSONDocument(JSONDocument::of(contentType, inputStream, localUrl)));
+    }
+
+    if (RDFDocument::accepts(contentType)) {
+        return std::unique_ptr<RemoteDocument>(
+                new RDFDocument(RDFDocument::of(contentType, inputStream)));
+    }
+
+    std::stringstream ss;
+    ss << "Unsupported content type: '" << contentType << "'. Supported content types are: ["
+       << MediaType::json_ld() << ", " << MediaType::json() << " and " << MediaType::n_quads() << "]";
+    throw JsonLdError(JsonLdError::LoadingDocumentFailed, ss.str());
+}
 
 std::unique_ptr<RemoteDocument> FileLoader::loadDocument(const std::string &url) {
-
+    using namespace std::string_literals;
     // todo: check cache
 
     // check file properties
@@ -50,39 +86,31 @@ std::unique_ptr<RemoteDocument> FileLoader::loadDocument(const std::string &url)
 
     std::string localUrl = url;
 
-    if(localUrl.find("file://") == 0)
+    if(localUrl.find("file://") == 0) {
         localUrl = localUrl.substr(7);
+    }
 
+    //MediaType contentType = (istream_ptr_) ? content_type_ : detectContentType(localUrl);
     MediaType contentType = detectContentType(localUrl);
-
     // open stream
-
-    std::ifstream inputStream{localUrl};
-    if(!inputStream.is_open())
+    if (istream_ptr_) {
+        if (istream_ptr_->good() && !istream_ptr_->eof()) {
+            auto doc = loadDocument(contentType, *istream_ptr_, localUrl);
+            // Reset string stream as this function can be called several time on the same string stream.
+            istream_ptr_->seekg(0, istream_ptr_->beg);
+            return doc;
+        }
         throw JsonLdError(JsonLdError::LoadingDocumentFailed,
-                          "Failed to open file: " + localUrl);
-
-    // todo: add to cache
-
-    if (JSONDocument::accepts(contentType)) {
-        if(localUrl.find("file://") == std::string::npos)
-            localUrl = "file://" + localUrl;
-
-        return std::unique_ptr<RemoteDocument>(
-                new JSONDocument(JSONDocument::of(contentType, inputStream, localUrl)));
+                          "Stream associated to \""s + localUrl + "\" was supposed to be open"s);
+    } else {
+        std::ifstream inputStream{localUrl};
+        if(!inputStream.is_open()) {
+            throw JsonLdError(JsonLdError::LoadingDocumentFailed,
+                              "Failed to open file: "s + localUrl);
+        }
+        // todo: add to cache
+        return loadDocument(contentType, inputStream, localUrl);
     }
-
-    if (RDFDocument::accepts(contentType)) {
-        return std::unique_ptr<RemoteDocument>(
-                new RDFDocument(RDFDocument::of(contentType, inputStream)));
-
-    }
-
-    std::stringstream ss;
-    ss << "Unsupported content type: '" << contentType << "'. Supported content types are: ["
-       << MediaType::json_ld() << ", " << MediaType::json() << " and " << MediaType::n_quads() << "]";
-    throw JsonLdError(JsonLdError::LoadingDocumentFailed, ss.str());
-
 }
 
 FileLoader *FileLoader::clone() const {

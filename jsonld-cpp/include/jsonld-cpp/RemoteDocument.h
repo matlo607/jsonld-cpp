@@ -9,7 +9,6 @@ namespace RDF {
     class RDFDataset;
 }
 
-
 class RemoteDocument {
 
 public:
@@ -27,7 +26,6 @@ public:
 
     virtual void setContextUrl(const std::string &url) = 0;
     virtual void setDocumentUrl(const std::string &url) = 0;
-
 };
 
 #endif //LIBJSONLD_CPP_REMOTEDOCUMENT_H

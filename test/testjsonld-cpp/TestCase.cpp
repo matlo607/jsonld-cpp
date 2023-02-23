@@ -54,12 +54,14 @@ TestCase TestCase::create(
 }
 
 JsonLdOptions TestCase::getOptions() {
-    std::unique_ptr<DocumentLoader> loader =
-            std::unique_ptr<DocumentLoader>(new UriBaseRewriter(
-                    baseUri,
-                    testsBase,
-                    std::unique_ptr<FileLoader>(new FileLoader())
-            ));
+    auto loader =
+        std::unique_ptr<DocumentLoader>(static_cast<DocumentLoader*>(
+            new UriBaseRewriter(
+                baseUri,
+                testsBase,
+                std::make_unique<FileLoader>(uri)
+            )
+        ));
 
     JsonLdOptions jsonLdOptions(std::move(loader));
     //jsonLdOptions.setOrdered(true);
