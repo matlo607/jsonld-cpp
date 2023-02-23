@@ -1,0 +1,17 @@
+[requires]
+nlohmann_json/3.11.2
+http-link-header-cpp/0.9.0@amazon/testing
+
+[build_requires]
+gtest/1.13.0
+rapidcheck/cci.20220514
+
+[generators]
+cmake
+
+[imports]
+bin, *.dll -> ./bin # Copies all dll files from packages bin folder to my local "bin" folder
+lib, *.dylib* -> ./lib # Copies all dylib files from packages lib folder to my local "lib" folder
+
+[options]
+rapidcheck:enable_gtest=True
