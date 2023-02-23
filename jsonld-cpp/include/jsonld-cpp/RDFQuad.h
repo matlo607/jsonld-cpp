@@ -2,6 +2,7 @@
 #define LIBJSONLD_CPP_RDFQUAD_H
 
 #include <jsonld-cpp/RDFNode.h>
+#include <iostream>
 #include <memory>
 #include <string>
 
@@ -59,6 +60,11 @@ namespace RDF {
         }
     };
 
+    std::ostream& operator<<(std::ostream&, const RDFQuad&);
 }
+
+namespace std {
+    string to_string(const RDF::RDFQuad&);
+} // namespace std
 
 #endif //LIBJSONLD_CPP_RDFQUAD_H

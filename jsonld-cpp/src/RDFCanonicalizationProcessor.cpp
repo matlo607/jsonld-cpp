@@ -535,3 +535,7 @@ std::string RDFCanonicalizationProcessor::normalize(const RDF::RDFDataset& datas
     return RDFDatasetUtils::toNQuads(::normalize(dataset, options));
 
 }
+
+RDF::RDFDataset RDFCanonicalizationProcessor::normalize2(const RDF::RDFDataset& dataset, const JsonLdOptions& options) {
+    return ::normalize(dataset, options);
+}

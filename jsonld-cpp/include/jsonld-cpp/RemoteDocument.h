@@ -17,7 +17,7 @@ public:
     RemoteDocument(const RemoteDocument&) = default;
     RemoteDocument& operator=(const RemoteDocument&) = default;
 
-    virtual ~RemoteDocument();
+    virtual ~RemoteDocument() = default;
 
     virtual MediaType getContentType() const = 0;
     virtual const std::string &getContextUrl() const = 0;

@@ -19,7 +19,7 @@ struct RDFCanonicalizationProcessor {
      * https://w3c-ccg.github.io/rdf-dataset-canonicalization/spec/#canonicalization-algorithm
      */
     static std::string normalize(const RDF::RDFDataset& dataset, const JsonLdOptions& options);
-
+    static RDF::RDFDataset normalize2(const RDF::RDFDataset& dataset, const JsonLdOptions& options);
 };
 
 

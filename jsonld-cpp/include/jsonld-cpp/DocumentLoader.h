@@ -13,7 +13,7 @@ public:
     DocumentLoader& operator=(const DocumentLoader&) = default;
 
     // virtual destructor needed as this is an abstract base class
-    virtual ~DocumentLoader();
+    virtual ~DocumentLoader() = default;
 
     // virtual clone function needed so that classes holding unique_ptrs to
     // DocumentLoader can be copied

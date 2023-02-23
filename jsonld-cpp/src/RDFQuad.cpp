@@ -4,6 +4,8 @@
 #include "jsonld-cpp/BlankNodeNames.h"
 #include "jsonld-cpp/RDFDatasetUtils.h"
 
+#include <sstream>
+
 using nlohmann::json;
 
 namespace RDF {
@@ -152,4 +154,18 @@ namespace RDF {
                 equals(lhs.getGraph(), rhs.getGraph());
     }
 
+    std::ostream& operator<<(std::ostream& os, const RDFQuad& quad)
+    {
+        os << RDFDatasetUtils::toNQuad(quad);
+        return os;
+    }
 }
+
+namespace std {
+    string to_string(const RDF::RDFQuad& quad)
+    {
+        ostringstream oss;
+        oss << quad;
+        return oss.str();
+    }
+} // namespace std

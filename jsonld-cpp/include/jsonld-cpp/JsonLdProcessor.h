@@ -42,6 +42,8 @@ namespace JsonLdProcessor {
     // an RdfDataset according to the steps in the RDF Canonicalization Algorithm
     // See: https://w3c-ccg.github.io/rdf-dataset-canonicalization/spec/#canonicalization-algorithm
     std::string normalize(const std::string& documentLocation, JsonLdOptions& options);
+
+    RDF::RDFDataset normalize2(const std::string& documentLocation, JsonLdOptions& options);
 }
 
 #endif //LIBJSONLD_CPP_JSONLDPROCESSOR_H

@@ -4,6 +4,7 @@
 #include <jsonld-cpp/RDFTriple.h>
 #include <jsonld-cpp/RDFQuad.h>
 #include <jsonld-cpp/JsonLdOptions.h>
+#include <iostream>
 #include <vector>
 #include <map>
 #include <string>
@@ -69,6 +70,11 @@ namespace RDF {
         RDFGraph::size_type numTriples() const;
     };
 
+    std::ostream& operator<<(std::ostream&, const RDFDataset&);
 }
+
+namespace std {
+    string to_string(const RDF::RDFDataset&);
+} // namespace std
 
 #endif //LIBJSONLD_CPP_RDFDATASET_H

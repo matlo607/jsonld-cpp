@@ -94,7 +94,7 @@ std::string RDFDatasetUtils::toNQuad(const RDF::RDFQuad& quad) {
         }
     }
 
-    ss << " .\n";
+    ss << " .";
 
     return ss.str();
 }

@@ -7,6 +7,8 @@
 #include "jsonld-cpp/BlankNodeNames.h"
 #include "jsonld-cpp/JsonLdError.h"
 
+#include <sstream>
+
 using nlohmann::json;
 
 namespace RDF {
@@ -58,4 +60,21 @@ namespace RDF {
         return count;
     }
 
+    std::ostream& operator<<(std::ostream& os, const RDFDataset& dataset)
+    {
+        for (auto const& quad: dataset.getAllGraphsAsQuads()) {
+            os << quad << std::endl;
+        }
+        return os;
+    }
 }
+
+
+namespace std {
+    string to_string(const RDF::RDFDataset& dataset)
+    {
+        ostringstream oss;
+        oss << dataset;
+        return oss.str();
+    }
+} // namespace std
