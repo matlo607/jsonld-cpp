@@ -20,10 +20,17 @@ To build jsonld-cpp, you will need:
 jsonld-cpp uses a pretty standard cmake build system:
 
 ```
-mkdir build
-cd build
-cmake ..
-make
+mkdir build-dir && cd build-dir
+conan install .. --build=missing
+cmake -GNinja -DCMAKE_PREFIX_PATH=$(pwd) -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$(pwd)/sysroot ..
+ninja
+ninja test
+ninja install
+```
+
+To export the thirdparty with Conan:
+```
+conan create . jsonld-cpp/0.5.0@amazon/testing --build-require
 ```
 
 You may run into permission issues during the build when the dependencies are
